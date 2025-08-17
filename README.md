@@ -49,7 +49,7 @@ A scalable real-time word frequency application built with **PySpark Structured 
 ## 📦 Project Structure
 
 ```structure
-aio2025-pyspark/
+Kafka-PySpark-Data-Pipeline-System/
 ├── docker-compose.yml          # Multi-container Docker application
 ├── producer-api/               # FastAPI producer service
 │   ├── main.py                # API endpoints and Kafka producer
@@ -80,7 +80,7 @@ aio2025-pyspark/
 
 ```bash
 # Clone the repository
-cd /Users//aio2025-pyspark
+cd /Users//Kafka-PySpark-Data-Pipeline-System
 
 # Start all services
 docker-compose up -d
