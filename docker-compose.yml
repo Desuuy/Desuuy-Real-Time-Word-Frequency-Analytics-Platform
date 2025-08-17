@@ -1,0 +1,115 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - wordcount-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - wordcount-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - wordcount-network
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-init
+    depends_on:
+      - kafka
+    volumes:
+      - ./scripts/kafka-init.sh:/tmp/kafka-init.sh
+    command: /bin/bash /tmp/kafka-init.sh
+    networks:
+      - wordcount-network
+
+  producer-api:
+    build:
+      context: ./producer-api
+      dockerfile: Dockerfile
+    container_name: producer-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - kafka
+      - kafka-init
+      - redis
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - wordcount-network
+
+  spark-job:
+    build:
+      context: ./spark-job
+      dockerfile: Dockerfile
+    container_name: spark-job
+    depends_on:
+      - kafka
+      - kafka-init
+      - redis
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - wordcount-network
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: dashboard
+    ports:
+      - "8501:8501"
+    depends_on:
+      - producer-api
+      - redis
+    environment:
+      - PRODUCER_API_URL=http://producer-api:8000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - wordcount-network
+
+networks:
+  wordcount-network:
+    driver: bridge
+
+volumes:
+  kafka-data:
+  zookeeper-data:
