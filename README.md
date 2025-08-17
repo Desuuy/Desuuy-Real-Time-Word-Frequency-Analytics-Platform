@@ -345,5 +345,3 @@ Each service produces structured logs:
 ## 📝 License
 
 This project is licensed under the MIT License.
-#   R e a l - T i m e - W o r d - F r e q u e n c y - A n a l y t i c s - P l a t f o r m  
- # Desuuy-Real-Time-Word-Frequency-Analytics-Platform
