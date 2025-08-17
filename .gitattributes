@@ -1,0 +1,13 @@
+# Giữ LF cho toàn bộ file text
+* text=auto eol=lf
+
+# Các loại file quan trọng sẽ luôn dùng LF
+*.py text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.Dockerfile text eol=lf
+*.dockerfile text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.csv text eol=lf
