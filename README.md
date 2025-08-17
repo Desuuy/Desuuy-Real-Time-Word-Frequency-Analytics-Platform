@@ -80,7 +80,7 @@ aio2025-pyspark/
 
 ```bash
 # Clone the repository
-cd /Users/thuanduong/Repository/aio2025-pyspark
+cd /Users//aio2025-pyspark
 
 # Start all services
 docker-compose up -d
